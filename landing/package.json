@@ -1,0 +1,10 @@
+{
+  "name": "landing",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'landing: scaffold placeholder (Phase 4)'",
+    "typecheck": "echo 'landing: no typecheck yet'"
+  }
+}

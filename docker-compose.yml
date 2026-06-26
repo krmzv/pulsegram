@@ -1,0 +1,17 @@
+services:
+  pulsegram:
+    build: .
+    image: ghcr.io/krmzv/pulsegram:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - pulsegram-data:/app/data
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
+      - SELF_HOSTED=${SELF_HOSTED:-true}
+      - DATABASE_URL=${DATABASE_URL:-./data/pulsegram.db}
+    restart: unless-stopped
+
+volumes:
+  pulsegram-data:

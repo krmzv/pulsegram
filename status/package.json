@@ -1,0 +1,10 @@
+{
+  "name": "status",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'status: scaffold placeholder (Phase 3)'",
+    "typecheck": "echo 'status: no typecheck yet'"
+  }
+}

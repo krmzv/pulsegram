@@ -1,0 +1,16 @@
+services:
+  pulsegram:
+    image: oven/bun:1
+    working_dir: /app
+    command: sh -c "bun install && bun run --filter api dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - BASE_URL=${BASE_URL:-http://localhost:3000}
+      - SELF_HOSTED=${SELF_HOSTED:-true}
+      - DATABASE_URL=./data/pulsegram.db
+      - NODE_ENV=development

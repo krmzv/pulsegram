@@ -1,0 +1,26 @@
+{
+  "name": "pulsegram",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.1.43",
+  "workspaces": [
+    "packages/*",
+    "api",
+    "dash",
+    "status",
+    "landing"
+  ],
+  "scripts": {
+    "dev": "bun run --filter api dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "test": "bun test",
+    "db:generate": "bun run --filter api db:generate",
+    "db:migrate": "bun run --filter api db:migrate"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.3",
+    "@types/bun": "^1.1.18"
+  }
+}

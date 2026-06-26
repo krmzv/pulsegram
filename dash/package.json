@@ -1,0 +1,10 @@
+{
+  "name": "dash",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'dash: scaffold placeholder (Phase 2)'",
+    "typecheck": "echo 'dash: no typecheck yet'"
+  }
+}

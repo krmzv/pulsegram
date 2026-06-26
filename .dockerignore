@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+dist
+**/dist
+.turbo
+**/.turbo
+.astro
+**/.astro
+data
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.local
+.git
+*.log
+.DS_Store
