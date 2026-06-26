@@ -1,7 +1,7 @@
 # ── Dependencies ─────────────────────────────────────────
 FROM oven/bun:1 AS deps
 WORKDIR /app
-COPY package.json bun.lock turbo.json tsconfig.base.json ./
+COPY package.json bun.lockb turbo.json tsconfig.base.json ./
 COPY packages/shared/package.json packages/shared/
 COPY api/package.json api/
 COPY dash/package.json dash/
@@ -13,6 +13,9 @@ RUN bun install --frozen-lockfile
 # We run TypeScript directly with Bun (bun:sqlite means no native modules to
 # compile), so there's no separate build step for the API.
 FROM oven/bun:1-slim AS production
+LABEL org.opencontainers.image.source="https://github.com/krmzv/pulsegram"
+LABEL org.opencontainers.image.description="Self-hosted uptime monitor with Telegram alerts"
+LABEL org.opencontainers.image.licenses="MIT"
 WORKDIR /app
 ENV NODE_ENV=production
 
