@@ -10,3 +10,5 @@ data/
 .env.local
 *.log
 .DS_Store
+PLAN_V1.md
+bbot-prd.md
