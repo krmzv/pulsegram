@@ -67,7 +67,7 @@ bun run dev             # start API with hot reload (reads .env from root)
 bun run build           # turbo build all workspaces
 bun run typecheck       # turbo typecheck all workspaces
 bun test                # run all tests (ssrf-guard, state-machine, utils)
-bun run db:generate     # drizzle-kit generate (SQLite schema)
+bun run db:generate     # drizzle-kit generate for both SQLite + PG (run after schema changes)
 bun run db:migrate      # run migrations
 ```
 
@@ -88,9 +88,28 @@ ALLOW_PRIVATE_TARGETS=false     # SSRF override, keep false
 - SQLite by default (WAL mode), single file in `./data/pulsegram.db`
 - Postgres when `DATABASE_URL` starts with `postgres`
 - Both schemas are identical in column/table names. SQLite schema is canonical; PG is cast to match
-- Migrations run automatically on boot via `migrate.ts`
+- Migrations run automatically on boot via `migrate.ts` (drizzle migrator, not inline DDL)
 - Tables: `users`, `monitors`, `heartbeats`, `incidents`, `ssl_info`
 - Every query scoped by `user_id` (resolved from `telegram_id`)
+
+## Migration workflow
+
+Schema changes always touch two files: `schema.sqlite.ts` AND `schema.pg.ts`.
+
+```bash
+# 1. edit schema files
+# 2. generate — produces numbered SQL in drizzle/sqlite/ and drizzle/pg/
+bun run db:generate
+# 3. commit schema files + generated SQL files + meta/ snapshots
+# 4. migrations apply automatically on next boot, or run manually:
+bun run db:migrate
+```
+
+Rules:
+- **Commit migration files.** `drizzle/sqlite/` and `drizzle/pg/` (including `meta/`) are source of truth
+- **Never edit a committed migration.** Fix mistakes with a new migration
+- drizzle tracks applied migrations in `__drizzle_migrations` table — new installs run all from 0000; existing installs run only the delta
+- `db:generate` runs both dialect configs in sequence; both SQL files must be committed together
 
 ## Security (non-negotiable)
 

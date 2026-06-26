@@ -13,7 +13,7 @@ export const SCHEDULER = {
   /** how often the scheduler wakes up to find due monitors */
   tickMs: 10_000,
   /** max concurrent HTTP checks per batch */
-  batchSize: 20,
+  batchSize: 50,
   /** max bytes we read from a response body before aborting (we only need status) */
   maxBodyBytes: 256 * 1024,
   /** max redirect hops we follow manually (each re-validated for SSRF) */
