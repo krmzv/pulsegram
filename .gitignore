@@ -3,6 +3,8 @@ dist/
 .turbo/
 .astro/
 data/
+context/
+docs/
 *.db
 *.db-shm
 *.db-wal

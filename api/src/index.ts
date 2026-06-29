@@ -3,7 +3,9 @@ import { loadConfig } from "./config";
 import { initDb } from "./db";
 import { runMigrations } from "./db/migrate";
 import { registerPlugins } from "./plugins";
+import { registerInternalRoutes } from "./routes/internal";
 import { startBot, stopBot } from "./bot";
+import { getBot } from "./bot/bot";
 import { startScheduler, stopScheduler } from "./scheduler/scheduler";
 
 async function main(): Promise<void> {
@@ -20,12 +22,17 @@ async function main(): Promise<void> {
     disableRequestLogging: cfg.isProd,
   });
   await registerPlugins(app, cfg);
+  await registerInternalRoutes(app);
 
   app.get("/healthz", async () => ({ status: "ok", selfHosted: cfg.selfHosted }));
 
   // 4. Background workers.
-  startScheduler();
-  await startBot();
+  if (cfg.schedulerEnabled) startScheduler();
+  if (cfg.botPolling) {
+    await startBot();
+  } else {
+    getBot(); // initialize so notifyDown/notifyRecovery can call getBot().api.sendMessage
+  }
 
   // 5. Listen (0.0.0.0 so it's reachable from outside the container).
   await app.listen({ port: cfg.port, host: "0.0.0.0" });
@@ -33,8 +40,8 @@ async function main(): Promise<void> {
 
   const shutdown = async (signal: string) => {
     console.log(`\n${signal} received, shutting down…`);
-    stopScheduler();
-    await stopBot().catch(() => {});
+    if (cfg.schedulerEnabled) stopScheduler();
+    if (cfg.botPolling) await stopBot().catch(() => {});
     await app.close().catch(() => {});
     process.exit(0);
   };

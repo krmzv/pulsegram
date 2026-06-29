@@ -88,4 +88,20 @@ export const sslInfo = pgTable("ssl_info", {
   checkedAt: bigint("checked_at", { mode: "number" }),
 });
 
-export const schema = { users, monitors, heartbeats, incidents, sslInfo };
+export const pendingEvents = pgTable(
+  "pending_events",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    monitorId: text("monitor_id")
+      .notNull()
+      .references(() => monitors.id, { onDelete: "cascade" }),
+    eventType: text("event_type").notNull(), // 'incident' | 'recovery'
+    payload: text("payload").notNull(), // JSON string
+    status: text("status").notNull().default("pending"), // 'pending' | 'delivered'
+    createdAt: bigint("created_at", { mode: "number" }).notNull().default(nowEpoch),
+    deliveredAt: bigint("delivered_at", { mode: "number" }),
+  },
+  (t) => [index("idx_pending_events_status").on(t.status)],
+);
+
+export const schema = { users, monitors, heartbeats, incidents, sslInfo, pendingEvents };

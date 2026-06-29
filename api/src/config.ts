@@ -17,6 +17,9 @@ const envSchema = z.object({
   SELF_HOSTED: boolish(false),
   ALLOW_PRIVATE_TARGETS: boolish(false),
   BETTER_AUTH_SECRET: z.string().optional(),
+  INTERNAL_SECRET: z.string().optional(),
+  SCHEDULER_ENABLED: boolish(true),
+  BOT_POLLING: boolish(true),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
 });
 
@@ -31,6 +34,9 @@ export interface Config {
   selfHosted: boolean;
   allowPrivateTargets: boolean;
   betterAuthSecret: string;
+  internalSecret: string;
+  schedulerEnabled: boolean;
+  botPolling: boolean;
   isProd: boolean;
 }
 
@@ -47,9 +53,9 @@ function dataDir(databaseUrl: string, dialect: Dialect): string {
  * Auto-generate BETTER_AUTH_SECRET and persist it to the data volume so
  * sessions survive restarts. Self-hosters never have to think about it.
  */
-function ensureAuthSecret(provided: string | undefined, dir: string): string {
+function ensureAuthSecret(provided: string | undefined, dir: string, filename = ".auth-secret"): string {
   if (provided && provided.length >= 16) return provided;
-  const secretPath = join(dir, ".auth-secret");
+  const secretPath = join(dir, filename);
   if (existsSync(secretPath)) {
     const existing = readFileSync(secretPath, "utf8").trim();
     if (existing.length >= 16) return existing;
@@ -74,6 +80,8 @@ export function loadConfig(): Config {
   const dir = dataDir(env.DATABASE_URL, dialect);
   if (dialect === "sqlite") mkdirSync(dir, { recursive: true });
 
+  const internalSecret = ensureAuthSecret(env.INTERNAL_SECRET, dir, ".internal-secret");
+
   cached = {
     telegramBotToken: env.TELEGRAM_BOT_TOKEN,
     baseUrl: env.BASE_URL,
@@ -83,6 +91,9 @@ export function loadConfig(): Config {
     selfHosted: env.SELF_HOSTED,
     allowPrivateTargets: env.ALLOW_PRIVATE_TARGETS,
     betterAuthSecret: ensureAuthSecret(env.BETTER_AUTH_SECRET, dir),
+    internalSecret,
+    schedulerEnabled: env.SCHEDULER_ENABLED,
+    botPolling: env.BOT_POLLING,
     isProd: env.NODE_ENV === "production",
   };
   return cached;

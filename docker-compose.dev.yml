@@ -1,5 +1,5 @@
 services:
-  pulsegram:
+  api:
     image: oven/bun:1
     working_dir: /app
     command: sh -c "bun install && bun run --filter api dev"
@@ -9,8 +9,10 @@ services:
       - .:/app
       - /app/node_modules
     environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - BASE_URL=${BASE_URL:-http://localhost:3000}
-      - SELF_HOSTED=${SELF_HOSTED:-true}
-      - DATABASE_URL=./data/pulsegram.db
-      - NODE_ENV=development
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+      SELF_HOSTED: ${SELF_HOSTED:-true}
+      DATABASE_URL: ${DATABASE_URL:-./data/pulsegram.db}
+      NODE_ENV: development
+      SCHEDULER_ENABLED: "true"
+      BOT_POLLING: "true"

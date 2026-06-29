@@ -1,5 +1,5 @@
 services:
-  pulsegram:
+  api:
     build: .
     image: ghcr.io/krmzv/pulsegram:latest
     ports:
@@ -7,11 +7,69 @@ services:
     volumes:
       - pulsegram-data:/app/data
     environment:
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - BASE_URL=${BASE_URL:-http://localhost:3000}
-      - SELF_HOSTED=${SELF_HOSTED:-true}
-      - DATABASE_URL=${DATABASE_URL:-./data/pulsegram.db}
+      DATABASE_URL: ${DATABASE_URL:-postgres://pulsegram:${DB_PASSWORD}@db:5432/pulsegram}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+      SELF_HOSTED: ${SELF_HOSTED:-false}
+      SCHEDULER_ENABLED: "false"
+      BOT_POLLING: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  probe:
+    build: ./probe
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://pulsegram:${DB_PASSWORD}@db:5432/pulsegram}
+      API_URL: http://api:3000
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      ALLOW_PRIVATE_TARGETS: ${ALLOW_PRIVATE_TARGETS:-false}
+    healthcheck:
+      test: ["CMD", "/probe", "-healthcheck"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  bot:
+    build: .
+    image: ghcr.io/krmzv/pulsegram:latest
+    command: ["bun", "run", "api/src/bot/main.ts"]
+    volumes:
+      - pulsegram-data:/app/data
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://pulsegram:${DB_PASSWORD}@db:5432/pulsegram}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      BASE_URL: ${BASE_URL:-http://localhost:3000}
+      SELF_HOSTED: ${SELF_HOSTED:-false}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: pulsegram
+      POSTGRES_DB: pulsegram
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsegram"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:
   pulsegram-data:
+  pgdata:
