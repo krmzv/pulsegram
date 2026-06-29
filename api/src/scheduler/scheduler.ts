@@ -7,6 +7,7 @@ import { checkUrl } from "../lib/http-check";
 import { openIncident, rowToMonitor } from "../modules/monitors/monitor.service";
 import { notifyDown, notifyRecovery } from "../bot/notifications";
 import { decide } from "./state-machine";
+import { pollPendingEvents } from "./event-poller";
 
 // In-memory consecutive-failure counters. Persistence isn't needed: on restart
 // we re-derive state from the next checks (a monitor that's truly down will
@@ -39,6 +40,7 @@ async function tick(): Promise<void> {
       await Promise.all(batch.map((m) => processMonitor(m)));
     }
     await maybeCleanup();
+    await pollPendingEvents();
   } catch (err) {
     console.error("[scheduler] tick error:", err);
   } finally {

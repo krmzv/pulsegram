@@ -8,6 +8,13 @@
       "when": 1782509262495,
       "tag": "0000_colorful_tiger_shark",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782762361090,
+      "tag": "0001_secret_karnak",
+      "breakpoints": true
     }
   ]
 }

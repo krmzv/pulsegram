@@ -84,4 +84,20 @@ export const sslInfo = sqliteTable("ssl_info", {
   checkedAt: integer("checked_at"),
 });
 
-export const schema = { users, monitors, heartbeats, incidents, sslInfo };
+export const pendingEvents = sqliteTable(
+  "pending_events",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    monitorId: text("monitor_id")
+      .notNull()
+      .references(() => monitors.id, { onDelete: "cascade" }),
+    eventType: text("event_type").notNull(), // 'incident' | 'recovery'
+    payload: text("payload").notNull(), // JSON string
+    status: text("status").notNull().default("pending"), // 'pending' | 'delivered'
+    createdAt: integer("created_at").notNull().default(nowEpoch),
+    deliveredAt: integer("delivered_at"),
+  },
+  (t) => [index("idx_pending_events_status").on(t.status)],
+);
+
+export const schema = { users, monitors, heartbeats, incidents, sslInfo, pendingEvents };

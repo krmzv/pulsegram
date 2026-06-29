@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "bun run --env-file ../.env --watch src/index.ts",
     "start": "bun run --env-file ../.env src/index.ts",
+    "bot": "bun run --env-file ../.env src/bot/main.ts",
     "build": "bun build src/index.ts --target=bun --outdir=dist",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate --config drizzle.sqlite.config.ts && drizzle-kit generate --config drizzle.pg.config.ts",
